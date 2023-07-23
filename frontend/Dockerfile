@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copying package.json and package-lock.json (if available) to the working directory
 COPY package*.json /app/
-COPY yarn.lock ./ 
+COPY yarn.lock ./
 
 # Installing dependencies
 RUN yarn install --frozen-lockfile
@@ -16,14 +16,23 @@ COPY . /app/
 # Building the Next.js app
 RUN yarn build
 
-# Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:1.15
+# Stage 1, based on Node.js, to run the app
+FROM node:18-alpine
 
-# Copying the build output from Stage 0 to the Nginx html directory
-COPY --from=build-stage /app/out /usr/share/nginx/html
+WORKDIR /app
 
-# Copying the Nginx configuration file
-COPY --from=build-stage /nginx.conf /etc/nginx/conf.d/default.conf
+# Copying package.json and package-lock.json (if available) to the working directory
+COPY package*.json /app/
+COPY yarn.lock ./
 
-# Copying the additional Nginx configuration file
-COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
+# Installing dependencies
+RUN yarn install --frozen-lockfile --production
+
+# Copying the rest of the frontend application to the working directory
+COPY . /app/
+
+# Copying the build from the previous stage
+COPY --from=build-stage /app/.next ./.next
+
+# Starting the app
+CMD ["yarn", "start"]
