@@ -16,11 +16,11 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./client
     volumes:
-      - ./frontend:/app
+      - ./client:/app
     ports:
-      - "3000:3000"
+      - "80:80"
 
 networks:
   default:
