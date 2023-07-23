@@ -17,8 +17,10 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        FRONTEND_ENV: dev
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
 
 networks:
   default:
